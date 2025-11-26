@@ -407,24 +407,48 @@ else:
             col1, col2, col3, col4 = st.columns(4)
             
             with col1:
-                st.markdown("### 👔 Daily Wardrobe")
+                st.markdown("""
+                <div style='background-color: rgba(37, 99, 235, 0.1); border: 1px solid rgba(37, 99, 235, 0.3); border-radius: 12px; padding: 20px; height: 100%;'>
+                    <h3 style='color: #93c5fd; margin-top: 0; display: flex; align-items: center; gap: 8px;'>
+                        <span>👔</span> Daily Wardrobe
+                    </h3>
+                """, unsafe_allow_html=True)
                 for item in advisory['outfit']:
-                    st.markdown(f"• {item}")
+                    st.markdown(f"<p style='font-size: 14px; line-height: 1.6; margin: 8px 0;'>• {item}</p>", unsafe_allow_html=True)
+                st.markdown("</div>", unsafe_allow_html=True)
             
             with col2:
-                st.markdown("### ✨ Self Care Rituals")
+                st.markdown("""
+                <div style='background-color: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 12px; padding: 20px; height: 100%;'>
+                    <h3 style='color: #fcd34d; margin-top: 0; display: flex; align-items: center; gap: 8px;'>
+                        <span>✨</span> Self Care Rituals
+                    </h3>
+                """, unsafe_allow_html=True)
                 for item in advisory['hygiene']:
-                    st.markdown(f"• {item}")
+                    st.markdown(f"<p style='font-size: 14px; line-height: 1.6; margin: 8px 0;'>• {item}</p>", unsafe_allow_html=True)
+                st.markdown("</div>", unsafe_allow_html=True)
             
             with col3:
-                st.markdown("### ☕ Lifestyle & Diet")
+                st.markdown("""
+                <div style='background-color: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 12px; padding: 20px; height: 100%;'>
+                    <h3 style='color: #6ee7b7; margin-top: 0; display: flex; align-items: center; gap: 8px;'>
+                        <span>☕</span> Lifestyle & Diet
+                    </h3>
+                """, unsafe_allow_html=True)
                 for item in advisory['lifestyle']:
-                    st.markdown(f"• {item}")
+                    st.markdown(f"<p style='font-size: 14px; line-height: 1.6; margin: 8px 0;'>• {item}</p>", unsafe_allow_html=True)
+                st.markdown("</div>", unsafe_allow_html=True)
             
             with col4:
-                st.markdown("### 🕐 Today's Routine")
+                st.markdown("""
+                <div style='background-color: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.3); border-radius: 12px; padding: 20px; height: 100%;'>
+                    <h3 style='color: #c4b5fd; margin-top: 0; display: flex; align-items: center; gap: 8px;'>
+                        <span>🕐</span> Today's Routine
+                    </h3>
+                """, unsafe_allow_html=True)
                 for item in advisory['routine']:
-                    st.markdown(f"• {item}")
+                    st.markdown(f"<p style='font-size: 14px; line-height: 1.6; margin: 8px 0;'>• {item}</p>", unsafe_allow_html=True)
+                st.markdown("</div>", unsafe_allow_html=True)
             
             st.markdown("<br>", unsafe_allow_html=True)
             
