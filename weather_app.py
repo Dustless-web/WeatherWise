@@ -4,8 +4,8 @@ import pandas as pd
 from streamlit_lottie import st_lottie
 from datetime import datetime
 
-# --- 1. CONFIGURATION ---
-st.set_page_config(page_title="WeatherWise Pro", page_icon="⚡", layout="wide")
+# --- 1. PAGE CONFIGURATION ---
+st.set_page_config(page_title="WeatherWise Pro", page_icon="🌤️", layout="wide")
 
 # --- 2. ASSETS & ANIMATIONS ---
 def load_lottieurl(url):
@@ -15,72 +15,63 @@ def load_lottieurl(url):
         return r.json()
     except: return None
 
-# Animations (Fail-safe)
+# Reliable Animations
 lottie_clear = load_lottieurl("https://lottie.host/5a91595d-d965-442b-a5ce-4af2438883cc/1z7K7qJ1sF.json") 
 lottie_rain = load_lottieurl("https://lottie.host/0a112702-6029-451e-84b2-243179267a57/H0852e697H.json") 
 lottie_cloud = load_lottieurl("https://lottie.host/0e611d27-2483-4700-b6f1-a1b635483259/3a2y0o2a3d.json")
 
-# --- 3. ULTRA-MODERN CSS ---
+# --- 3. PROFESSIONAL CSS STYLING ---
 st.markdown("""
     <style>
-    /* ANIMATED BACKGROUND */
+    /* MAIN BACKGROUND */
     .stApp {
-        background: linear-gradient(-45deg, #1e3c72, #2a5298, #23d5ab, #23a6d5);
-        background-size: 400% 400%;
-        animation: gradient 15s ease infinite;
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
         color: white;
     }
     
-    @keyframes gradient {
-        0% {background-position: 0% 50%;}
-        50% {background-position: 100% 50%;}
-        100% {background-position: 0% 50%;}
-    }
+    /* REMOVE STREAMLIT PADDING & ANCHORS */
+    .block-container { padding-top: 2rem; }
+    a.anchor-link { display: none; }
+    [data-testid="stHeader"] { display: none; }
 
-    /* GLASSMORPHISM CARDS */
-    .metric-card {
+    /* GLASSMORPHISM HERO CARD (Top Section) */
+    .hero-card {
         background: rgba(255, 255, 255, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        border-radius: 15px;
-        padding: 20px;
-        text-align: center;
-        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-        backdrop-filter: blur(5px);
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
         margin-bottom: 20px;
-    }
-    .metric-value {
-        font-size: 2rem;
-        font-weight: bold;
-        color: #ffffff;
-    }
-    .metric-label {
-        font-size: 0.9rem;
-        color: #e0e0e0;
+        text-align: center;
     }
 
-    /* ADVISORY CARDS */
-    .advice-card {
+    /* METRIC CARDS (Small) */
+    .metric-card {
         background: rgba(0, 0, 0, 0.3);
-        border-radius: 10px;
+        border-radius: 15px;
         padding: 15px;
-        margin-bottom: 10px;
+        text-align: center;
+        border: 1px solid rgba(255,255,255,0.05);
+    }
+    .metric-value { font-size: 1.8rem; font-weight: bold; color: white; }
+    .metric-label { font-size: 0.9rem; color: #a0a0a0; margin-bottom: 5px; }
+
+    /* ADVICE CARDS (Colored Borders) */
+    .advice-card {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+        padding: 20px;
+        height: 100%;
         border-left: 5px solid;
     }
+    .advice-title { font-size: 1.1rem; font-weight: bold; margin-bottom: 10px; color: white; }
+    .advice-text { font-size: 0.95rem; color: #e0e0e0; line-height: 1.5; }
 
-    /* CUSTOM HEADERS */
-    h1, h2, h3, h4 {
-        color: white !important;
-        text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-    }
-    
-    /* REMOVE WHITE SPACE AT TOP */
-    .block-container {
-        padding-top: 2rem;
-    }
     </style>
     """, unsafe_allow_html=True)
 
-# --- 4. LOGIC ENGINE (DETAILED) ---
+# --- 4. DATA LOGIC ---
 def get_weather_data(city):
     geo_url = f"https://geocoding-api.open-meteo.com/v1/search?name={city}&count=1&language=en&format=json"
     try:
@@ -96,45 +87,42 @@ def get_weather_data(city):
     except: return None, None, None, None
 
 def generate_smart_advisory(temp, feels_like, humidity, rain, wind):
-    # --- OUTFIT ---
-    outfit = "👕 **Outfit:** "
-    if rain > 0: outfit += "Waterproof shell required. Rain likely. "
-    elif wind > 20: outfit += "Windbreaker recommended. "
-    
-    if feels_like < 10: outfit += "Heavy coat & thermal layers."
-    elif 10 <= feels_like < 18: outfit += "Sweater or Hoodie."
-    elif 18 <= feels_like < 25: outfit += "Long sleeve t-shirt."
-    else: outfit += "Breathable cottons, shorts/skirts."
+    # OUTFIT
+    outfit = ""
+    if rain > 0: outfit += "☔ Waterproof shell essential. "
+    if feels_like < 15: outfit += "🧥 Wear a heavy coat and thermal layers."
+    elif feels_like < 22: outfit += "🧣 A light hoodie or windbreaker is perfect."
+    else: outfit += "👕 Breathable cottons; stay cool."
+    if wind > 20: outfit += " 💨 Avoid hats or loose scarves."
 
-    # --- HYGIENE ---
-    hygiene = "🧴 **Hygiene:** "
+    # HYGIENE
+    hygiene = ""
     dew_point = temp - ((100 - humidity) / 5)
-    if humidity < 35: hygiene += "Skin is drying out. Use moisturizer."
-    elif humidity > 75: hygiene += "High sweat risk. Carry wet wipes."
-    elif dew_point > 20: hygiene += "Frizz alert! Use hair serum."
-    else: hygiene += "Conditions are balanced."
+    if humidity < 35: hygiene += "🧴 Skin is dry: Use moisturizer."
+    elif humidity > 70: hygiene += "🚿 High humidity: Carry wet wipes."
+    elif dew_point > 20: hygiene += "🦁 Frizz Alert: Use hair serum."
+    else: hygiene += "✨ Conditions are balanced."
 
-    # --- LIFESTYLE ---
-    lifestyle = "🚀 **Activity:** "
-    if rain > 0.5 and wind > 30: lifestyle += "Drive slow (Hydroplaning risk)."
-    elif temp > 30: lifestyle += "Stay hydrated. Heat stress risk."
-    elif wind > 25: lifestyle += "Avoid outdoor cycling."
-    else: lifestyle += "Great conditions for outdoor activities."
+    # LIFESTYLE
+    lifestyle = ""
+    if rain > 0.5: lifestyle += "🚗 Drive slow (Hydroplaning risk)."
+    elif temp > 30: lifestyle += "💧 Heat stress risk: Drink water."
+    else: lifestyle += "🏃 Perfect weather for outdoor cardio."
     
     return outfit, hygiene, lifestyle
 
-# --- 5. UI LAYOUT ---
+# --- 5. UI STRUCTURE ---
 
 # Sidebar
 with st.sidebar:
-    st.header("📍 Location")
-    city = st.text_input("Search City", "Toronto")
+    st.markdown("### 📍 Location")
+    city_input = st.text_input("City Name", "Bengaluru", label_visibility="collapsed")
     st.markdown("---")
     st.caption("WeatherWise Pro v3.0")
 
-# Main Page
-if city:
-    data, name, lat, lon = get_weather_data(city)
+# Main Logic
+if city_input:
+    data, name, lat, lon = get_weather_data(city_input)
     
     if data:
         current = data["current"]
@@ -144,70 +132,81 @@ if city:
         wind = current["wind_speed_10m"]
         code = current["weather_code"]
         humidity = current["relative_humidity_2m"]
+
+        # --- A. HERO SECTION (The Big Card) ---
+        # We use a container to group the top info
+        with st.container():
+            c1, c2 = st.columns([1, 2])
+            
+            # Animation Logic
+            anim = lottie_cloud
+            if code in range(51, 100): anim = lottie_rain
+            elif code <= 3: anim = lottie_clear
+            
+            with c1:
+                if anim: st_lottie(anim, height=180, key="hero_anim")
+                else: st.markdown("# 🌤️")
+            
+            with c2:
+                # Using custom HTML for perfect alignment
+                st.markdown(f"""
+                <div style="text-align: left; padding-top: 20px;">
+                    <h1 style="font-size: 60px; margin: 0; color: white;">{temp}°</h1>
+                    <h2 style="font-size: 30px; margin: 0; color: #e0e0e0;">{name}</h2>
+                    <p style="font-size: 16px; color: #a0a0a0;">Feels like {feels}° | Wind {wind} km/h</p>
+                </div>
+                """, unsafe_allow_html=True)
         
-        # --- TITLE SECTION ---
-        st.markdown("<h1 style='text-align: center; margin-bottom: 5px;'>WeatherWise Pro</h1>", unsafe_allow_html=True)
-        st.markdown("<p style='text-align: center; font-size: 1.2rem; margin-bottom: 30px;'>Your AI-Powered Personal Meteorologist</p>", unsafe_allow_html=True)
-
-        # --- ANIMATION & TEMP ---
-        anim = None
-        if code in range(51, 68) or code in range(80, 100): anim = lottie_rain
-        elif code <= 3: anim = lottie_clear
-        else: anim = lottie_cloud
-
-        c1, c2 = st.columns([1, 2])
-        with c1:
-            if anim: st_lottie(anim, height=200, key="weather_anim")
-            else: st.markdown("<h1 style='text-align: center; font-size: 100px;'>🌤️</h1>", unsafe_allow_html=True)
-        with c2:
-            st.markdown(f"<h1 style='font-size: 90px; margin-bottom: 0;'>{temp}°</h1>", unsafe_allow_html=True)
-            st.markdown(f"<h2>{name}</h2>", unsafe_allow_html=True)
-            st.write(f"Feels like {feels}° | Wind {wind} km/h")
-
         st.markdown("---")
 
-        # --- METRIC CARDS ---
-        col1, col2, col3 = st.columns(3)
-        def card(label, value):
-            return f"""<div class="metric-card"><div class="metric-label">{label}</div><div class="metric-value">{value}</div></div>"""
+        # --- B. METRICS ROW ---
+        m1, m2, m3 = st.columns(3)
+        def metric_html(label, value, icon):
+            return f"""
+            <div class="metric-card">
+                <div class="metric-label">{icon} {label}</div>
+                <div class="metric-value">{value}</div>
+            </div>
+            """
         
-        with col1: st.markdown(card("Humidity", f"{humidity}%"), unsafe_allow_html=True)
-        with col2: st.markdown(card("Wind Speed", f"{wind} km/h"), unsafe_allow_html=True)
-        with col3: st.markdown(card("Precipitation", f"{rain} mm"), unsafe_allow_html=True)
+        with m1: st.markdown(metric_html("Humidity", f"{humidity}%", "💧"), unsafe_allow_html=True)
+        with m2: st.markdown(metric_html("Wind", f"{wind} km/h", "💨"), unsafe_allow_html=True)
+        with m3: st.markdown(metric_html("Precipitation", f"{rain} mm", "🌧️"), unsafe_allow_html=True)
 
-        # --- DETAILED ADVICE SECTION ---
-        st.subheader("🧠 AI Lifestyle Analysis")
-        
-        # Get detailed advice
+        st.markdown("### ") # Spacer
+
+        # --- C. AI ADVISORY SECTION ---
+        st.markdown("### 🧠 AI Lifestyle Analysis")
         outfit_txt, hygiene_txt, life_txt = generate_smart_advisory(temp, feels, humidity, rain, wind)
-
-        # Helper for Advice Cards
-        def advice_html(content, color):
+        
+        a1, a2, a3 = st.columns(3)
+        
+        def advice_html(title, text, color, icon):
             return f"""
             <div class="advice-card" style="border-color: {color};">
-                <p style="font-size: 1.1rem; margin: 0; color: white;">{content}</p>
+                <div class="advice-title">{icon} {title}</div>
+                <div class="advice-text">{text}</div>
             </div>
             """
 
-        a1, a2, a3 = st.columns(3)
-        with a1: st.markdown(advice_html(outfit_txt, "#00f260"), unsafe_allow_html=True) # Green
-        with a2: st.markdown(advice_html(hygiene_txt, "#00d2ff"), unsafe_allow_html=True) # Blue
-        with a3: st.markdown(advice_html(life_txt, "#ff007f"), unsafe_allow_html=True)   # Pink
+        with a1: st.markdown(advice_html("Wardrobe", outfit_txt, "#00f260", "🧥"), unsafe_allow_html=True)
+        with a2: st.markdown(advice_html("Hygiene", hygiene_txt, "#00d2ff", "🧴"), unsafe_allow_html=True)
+        with a3: st.markdown(advice_html("Lifestyle", life_txt, "#ff007f", "🚀"), unsafe_allow_html=True)
 
         st.markdown("---")
 
-        # --- MAP & CHART SECTION ---
-        c_chart, c_map = st.columns([2, 1])
+        # --- D. VISUALS (Chart & Map) ---
+        v1, v2 = st.columns([2, 1])
         
-        with c_chart:
-            st.subheader("📈 24h Trend")
+        with v1:
+            st.markdown("#### 📅 24h Trend")
             hourly = data["hourly"]
-            chart_data = pd.DataFrame({"Temperature": hourly["temperature_2m"][:24]})
-            st.line_chart(chart_data)
-        
-        with c_map:
-            st.subheader("🗺️ Radar")
-            st.map(pd.DataFrame({'lat': [lat], 'lon': [lon]}))
-        
+            chart_df = pd.DataFrame({"Temperature": hourly["temperature_2m"][:24]})
+            st.line_chart(chart_df, color="#ff4b4b", height=250)
+            
+        with v2:
+            st.markdown("#### 📍 Radar")
+            st.map(pd.DataFrame({'lat': [lat], 'lon': [lon]}), zoom=10, use_container_width=True)
+
     else:
-        st.error("City not found or API error.")
+        st.error("City not found!")
