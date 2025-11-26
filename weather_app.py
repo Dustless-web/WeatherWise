@@ -10,15 +10,12 @@ st.set_page_config(page_title="WeatherWise Pro", page_icon="⚡", layout="wide")
 # --- 2. ASSETS & ANIMATIONS ---
 def load_lottieurl(url):
     try:
-        r = requests.get(url, timeout=5) # Added timeout to prevent hanging
-        if r.status_code != 200:
-            return None
+        r = requests.get(url, timeout=5)
+        if r.status_code != 200: return None
         return r.json()
-    except:
-        return None
+    except: return None
 
-# Load Lottie Animations (More reliable links)
-# If these fail, the app will now safe-fail to an emoji instead of crashing
+# Animations (Fail-safe)
 lottie_clear = load_lottieurl("https://lottie.host/5a91595d-d965-442b-a5ce-4af2438883cc/1z7K7qJ1sF.json") 
 lottie_rain = load_lottieurl("https://lottie.host/0a112702-6029-451e-84b2-243179267a57/H0852e697H.json") 
 lottie_cloud = load_lottieurl("https://lottie.host/0e611d27-2483-4700-b6f1-a1b635483259/3a2y0o2a3d.json")
@@ -49,6 +46,7 @@ st.markdown("""
         text-align: center;
         box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
         backdrop-filter: blur(5px);
+        margin-bottom: 20px;
     }
     .metric-value {
         font-size: 2rem;
@@ -60,17 +58,30 @@ st.markdown("""
         color: #e0e0e0;
     }
 
+    /* ADVISORY CARDS */
+    .advice-card {
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 10px;
+        border-left: 5px solid;
+    }
+
     /* CUSTOM HEADERS */
-    h1, h2, h3 {
+    h1, h2, h3, h4 {
         color: white !important;
         text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    }
+    
+    /* REMOVE WHITE SPACE AT TOP */
+    .block-container {
+        padding-top: 2rem;
     }
     </style>
     """, unsafe_allow_html=True)
 
-# --- 4. LOGIC ENGINE ---
+# --- 4. LOGIC ENGINE (DETAILED) ---
 def get_weather_data(city):
-    # Geocoding
     geo_url = f"https://geocoding-api.open-meteo.com/v1/search?name={city}&count=1&language=en&format=json"
     try:
         geo_res = requests.get(geo_url).json()
@@ -79,27 +90,47 @@ def get_weather_data(city):
         lat, lon = geo_res["results"][0]["latitude"], geo_res["results"][0]["longitude"]
         name = geo_res["results"][0]["name"]
         
-        # Weather
         w_url = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,wind_speed_10m&hourly=temperature_2m&timezone=auto"
         w_res = requests.get(w_url).json()
         return w_res, name, lat, lon
-    except:
-        return None, None, None, None
+    except: return None, None, None, None
 
-def generate_advice(temp, rain):
-    if rain > 0: return "🌧️ Rainy vibes. Grab a trench coat and waterproof boots."
-    elif temp < 15: return "❄️ It's chilly! Layer up with a hoodie and thermal jacket."
-    elif temp > 28: return "☀️ Heatwave alert. Linen shirts and hydration check."
-    return "✨ Enjoy the day! Conditions are stable."
+def generate_smart_advisory(temp, feels_like, humidity, rain, wind):
+    # --- OUTFIT ---
+    outfit = "👕 **Outfit:** "
+    if rain > 0: outfit += "Waterproof shell required. Rain likely. "
+    elif wind > 20: outfit += "Windbreaker recommended. "
+    
+    if feels_like < 10: outfit += "Heavy coat & thermal layers."
+    elif 10 <= feels_like < 18: outfit += "Sweater or Hoodie."
+    elif 18 <= feels_like < 25: outfit += "Long sleeve t-shirt."
+    else: outfit += "Breathable cottons, shorts/skirts."
+
+    # --- HYGIENE ---
+    hygiene = "🧴 **Hygiene:** "
+    dew_point = temp - ((100 - humidity) / 5)
+    if humidity < 35: hygiene += "Skin is drying out. Use moisturizer."
+    elif humidity > 75: hygiene += "High sweat risk. Carry wet wipes."
+    elif dew_point > 20: hygiene += "Frizz alert! Use hair serum."
+    else: hygiene += "Conditions are balanced."
+
+    # --- LIFESTYLE ---
+    lifestyle = "🚀 **Activity:** "
+    if rain > 0.5 and wind > 30: lifestyle += "Drive slow (Hydroplaning risk)."
+    elif temp > 30: lifestyle += "Stay hydrated. Heat stress risk."
+    elif wind > 25: lifestyle += "Avoid outdoor cycling."
+    else: lifestyle += "Great conditions for outdoor activities."
+    
+    return outfit, hygiene, lifestyle
 
 # --- 5. UI LAYOUT ---
 
 # Sidebar
 with st.sidebar:
     st.header("📍 Location")
-    city = st.text_input("Search City", "New York")
+    city = st.text_input("Search City", "Toronto")
     st.markdown("---")
-    st.caption("WeatherWise Pro v2.1")
+    st.caption("WeatherWise Pro v3.0")
 
 # Main Page
 if city:
@@ -112,64 +143,71 @@ if city:
         rain = current["precipitation"]
         wind = current["wind_speed_10m"]
         code = current["weather_code"]
+        humidity = current["relative_humidity_2m"]
         
-        # Determine Animation
-        anim = None
-        if code in range(51, 68) or code in range(80, 100):
-            anim = lottie_rain
-        elif code <= 3:
-            anim = lottie_clear
-        else:
-            anim = lottie_cloud
+        # --- TITLE SECTION ---
+        st.markdown("<h1 style='text-align: center; margin-bottom: 5px;'>WeatherWise Pro</h1>", unsafe_allow_html=True)
+        st.markdown("<p style='text-align: center; font-size: 1.2rem; margin-bottom: 30px;'>Your AI-Powered Personal Meteorologist</p>", unsafe_allow_html=True)
 
-        # --- HEADER SECTION ---
+        # --- ANIMATION & TEMP ---
+        anim = None
+        if code in range(51, 68) or code in range(80, 100): anim = lottie_rain
+        elif code <= 3: anim = lottie_clear
+        else: anim = lottie_cloud
+
         c1, c2 = st.columns([1, 2])
-        
         with c1:
-            # --- CRASH FIX: SAFETY CHECK ---
-            if anim:
-                st_lottie(anim, height=200, key="weather_anim")
-            else:
-                # If animation fails, show a big emoji instead
-                st.markdown("<h1 style='text-align: center; font-size: 100px;'>🌤️</h1>", unsafe_allow_html=True)
-                
+            if anim: st_lottie(anim, height=200, key="weather_anim")
+            else: st.markdown("<h1 style='text-align: center; font-size: 100px;'>🌤️</h1>", unsafe_allow_html=True)
         with c2:
-            st.markdown(f"<h1 style='font-size: 80px; margin-bottom: 0;'>{temp}°</h1>", unsafe_allow_html=True)
+            st.markdown(f"<h1 style='font-size: 90px; margin-bottom: 0;'>{temp}°</h1>", unsafe_allow_html=True)
             st.markdown(f"<h2>{name}</h2>", unsafe_allow_html=True)
             st.write(f"Feels like {feels}° | Wind {wind} km/h")
 
         st.markdown("---")
 
-        # --- CUSTOM METRIC CARDS ---
+        # --- METRIC CARDS ---
         col1, col2, col3 = st.columns(3)
-        
         def card(label, value):
-            return f"""
-            <div class="metric-card">
-                <div class="metric-label">{label}</div>
-                <div class="metric-value">{value}</div>
-            </div>
-            """
-            
-        with col1: st.markdown(card("Humidity", f"{current['relative_humidity_2m']}%"), unsafe_allow_html=True)
+            return f"""<div class="metric-card"><div class="metric-label">{label}</div><div class="metric-value">{value}</div></div>"""
+        
+        with col1: st.markdown(card("Humidity", f"{humidity}%"), unsafe_allow_html=True)
         with col2: st.markdown(card("Wind Speed", f"{wind} km/h"), unsafe_allow_html=True)
         with col3: st.markdown(card("Precipitation", f"{rain} mm"), unsafe_allow_html=True)
 
+        # --- DETAILED ADVICE SECTION ---
+        st.subheader("🧠 AI Lifestyle Analysis")
+        
+        # Get detailed advice
+        outfit_txt, hygiene_txt, life_txt = generate_smart_advisory(temp, feels, humidity, rain, wind)
+
+        # Helper for Advice Cards
+        def advice_html(content, color):
+            return f"""
+            <div class="advice-card" style="border-color: {color};">
+                <p style="font-size: 1.1rem; margin: 0; color: white;">{content}</p>
+            </div>
+            """
+
+        a1, a2, a3 = st.columns(3)
+        with a1: st.markdown(advice_html(outfit_txt, "#00f260"), unsafe_allow_html=True) # Green
+        with a2: st.markdown(advice_html(hygiene_txt, "#00d2ff"), unsafe_allow_html=True) # Blue
+        with a3: st.markdown(advice_html(life_txt, "#ff007f"), unsafe_allow_html=True)   # Pink
+
         st.markdown("---")
 
-        # --- ADVISORY BANNER ---
-        st.markdown(f"""
-        <div style="background: rgba(0,0,0,0.5); border-left: 6px solid #00f260; padding: 20px; border-radius: 10px;">
-            <h3 style="color: #00f260; margin:0;">🤖 AI Lifestyle Advice</h3>
-            <p style="font-size: 1.2rem; margin-top: 10px; color: white;">{generate_advice(temp, rain)}</p>
-        </div>
-        """, unsafe_allow_html=True)
+        # --- MAP & CHART SECTION ---
+        c_chart, c_map = st.columns([2, 1])
         
-        # --- CHART ---
-        st.markdown("### 📈 24h Temperature Trend")
-        hourly = data["hourly"]
-        chart_data = pd.DataFrame({"Temperature": hourly["temperature_2m"][:24]})
-        st.line_chart(chart_data)
+        with c_chart:
+            st.subheader("📈 24h Trend")
+            hourly = data["hourly"]
+            chart_data = pd.DataFrame({"Temperature": hourly["temperature_2m"][:24]})
+            st.line_chart(chart_data)
+        
+        with c_map:
+            st.subheader("🗺️ Radar")
+            st.map(pd.DataFrame({'lat': [lat], 'lon': [lon]}))
         
     else:
         st.error("City not found or API error.")
