@@ -2,7 +2,11 @@ import streamlit as st
 import requests
 import pandas as pd
 from datetime import datetime
-import plotly.graph_objects as go
+try:
+    import plotly.graph_objects as go
+    PLOTLY_AVAILABLE = True
+except ImportError:
+    PLOTLY_AVAILABLE = False
 
 # Page config
 st.set_page_config(
@@ -432,29 +436,38 @@ else:
                 hours = hourly['time'][:24]
                 temps = hourly['temperature_2m'][:24]
                 
-                fig = go.Figure()
-                fig.add_trace(go.Scatter(
-                    x=[datetime.fromisoformat(h) for h in hours],
-                    y=temps,
-                    mode='lines',
-                    fill='tozeroy',
-                    line=dict(color='#60a5fa', width=3),
-                    fillcolor='rgba(96, 165, 250, 0.2)'
-                ))
-                
-                fig.update_layout(
-                    title="24-Hour Temperature Forecast",
-                    xaxis_title="Time",
-                    yaxis_title="Temperature (°C)",
-                    height=300,
-                    plot_bgcolor='rgba(31, 41, 55, 0.3)',
-                    paper_bgcolor='rgba(0,0,0,0)',
-                    font=dict(color='white'),
-                    xaxis=dict(showgrid=True, gridcolor='rgba(75, 85, 99, 0.3)'),
-                    yaxis=dict(showgrid=True, gridcolor='rgba(75, 85, 99, 0.3)')
-                )
-                
-                st.plotly_chart(fig, use_container_width=True)
+                if PLOTLY_AVAILABLE:
+                    fig = go.Figure()
+                    fig.add_trace(go.Scatter(
+                        x=[datetime.fromisoformat(h) for h in hours],
+                        y=temps,
+                        mode='lines',
+                        fill='tozeroy',
+                        line=dict(color='#60a5fa', width=3),
+                        fillcolor='rgba(96, 165, 250, 0.2)'
+                    ))
+                    
+                    fig.update_layout(
+                        title="24-Hour Temperature Forecast",
+                        xaxis_title="Time",
+                        yaxis_title="Temperature (°C)",
+                        height=300,
+                        plot_bgcolor='rgba(31, 41, 55, 0.3)',
+                        paper_bgcolor='rgba(0,0,0,0)',
+                        font=dict(color='white'),
+                        xaxis=dict(showgrid=True, gridcolor='rgba(75, 85, 99, 0.3)'),
+                        yaxis=dict(showgrid=True, gridcolor='rgba(75, 85, 99, 0.3)')
+                    )
+                    
+                    st.plotly_chart(fig, use_container_width=True)
+                else:
+                    # Fallback to simple line chart
+                    st.markdown("### 📈 24-Hour Temperature Forecast")
+                    chart_data = pd.DataFrame({
+                        'Time': [datetime.fromisoformat(h) for h in hours],
+                        'Temperature (°C)': temps
+                    })
+                    st.line_chart(chart_data.set_index('Time'))
             
             with col2:
                 st.markdown(f"""
