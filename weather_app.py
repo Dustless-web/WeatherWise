@@ -5,7 +5,7 @@ from streamlit_lottie import st_lottie
 from datetime import datetime
 
 # --- 1. PAGE CONFIGURATION ---
-st.set_page_config(page_title="WeatherWise Pro", page_icon="🌤️", layout="wide")
+st.set_page_config(page_title="WeatherWise", page_icon="🌤️", layout="wide")
 
 # --- 2. ASSETS & ANIMATIONS ---
 def load_lottieurl(url):
