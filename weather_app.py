@@ -12,14 +12,24 @@ st.set_page_config(
 )
 
 # --- 2. CUSTOM CSS FOR "GLASS" LOOK ---
+# --- 2. CUSTOM CSS FOR VISIBLE CARDS ---
 st.markdown("""
     <style>
-    .stMetric {
-        background-color: #f0f2f6;
+    /* Styles for the metric cards (Temperature, Humidity, etc.) */
+    [data-testid="stMetric"] {
+        background-color: #262730; /* Darker background for contrast */
         padding: 15px;
         border-radius: 10px;
-        box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+        box-shadow: 2px 2px 5px rgba(0,0,0,0.3); /* Slightly stronger shadow */
+        color: white; /* Ensures text is white */
     }
+    
+    /* Styles for the labels within the cards to ensure they are readable */
+    [data-testid="stMetricLabel"] {
+        color: #b4b4b4; /* Slightly lighter gray for the label text */
+    }
+
+    /* Styles for the expanding advisory cards */
     div[data-testid="stExpander"] div[role="button"] p {
         font-size: 1.1rem;
         font-weight: 600;
@@ -170,4 +180,5 @@ if city:
                 st.caption(f"Sun Rise: {sunrise}  |  Sun Set: {sunset}")
 
     except Exception as e:
+
         st.error(f"Error fetching data: {e}")
