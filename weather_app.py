@@ -19,42 +19,62 @@ st.set_page_config(
 # Custom CSS
 st.markdown("""
 <style>
-    .main {
+    .main, .stApp {
         background-color: #0e1117;
+        color: #ffffff !important;
     }
-    .stApp {
-        background-color: #0e1117;
+
+    html, body, [class*="css"] {
+        color: #ffffff !important;
     }
+
+    h1, h2, h3, h4, h5, h6, p, span, div {
+        color: #ffffff !important;
+    }
+
+    /* Metric Values */
     div[data-testid="stMetricValue"] {
-        font-size: 28px;
+        font-size: 30px;
         font-weight: bold;
+        color: #ffffff !important;
     }
+
     div[data-testid="stMetricLabel"] {
-        font-size: 12px;
+        font-size: 14px;
         text-transform: uppercase;
         font-weight: bold;
+        color: #d1d5db !important;
     }
+
+    /* Input boxes */
+    .stTextInput input {
+        background-color: #1f2937;
+        color: #ffffff !important;
+        border: 1px solid #4b5563;
+        border-radius: 8px;
+    }
+
+    /* Buttons */
+    .stButton button {
+        background-color: #374151;
+        color: #ffffff !important;
+        border: 1px solid #4b5563;
+        border-radius: 8px;
+        font-size: 15px;
+    }
+    .stButton button:hover {
+        background-color: #4b5563;
+        border-color: #6b7280;
+    }
+
+    /* Advisory Cards */
     .advisory-card {
-        background-color: rgba(31, 41, 55, 0.5);
-        border: 1px solid rgba(75, 85, 99, 0.5);
+        background-color: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.15);
         border-radius: 12px;
         padding: 20px;
         margin: 10px 0;
-    }
-    h1, h2, h3, h4, h5, h6 {
-        color: white !important;
-    }
-    .stTextInput input {
-        background-color: #1f2937;
-        color: white;
-        border: 1px solid #374151;
-        border-radius: 8px;
-    }
-    .stButton button {
-        background-color: #1f2937;
-        color: white;
-        border: 1px solid #374151;
-        border-radius: 8px;
+        color: #ffffff !important;
     }
 </style>
 """, unsafe_allow_html=True)
