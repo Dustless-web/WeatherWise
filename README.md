@@ -1,4 +1,4 @@
-# 🌦️ WeatherWise: Smart Weather & Lifestyle Advisor
+# 🌦️ WeatherWise: Smart Weather and Lifestyle Advisor
 
 [![Platform](https://img.shields.io/badge/Platform-Android-green.svg)]()
 [![Kotlin](https://img.shields.io/badge/Language-Kotlin-blue.svg)]()
