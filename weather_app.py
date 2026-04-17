@@ -119,7 +119,7 @@ def generate_smart_advisory(current, daily, aqi):
     if rain > 0.5:
         outfit.append("👢 Shoes: Waterproof boots or gumboots. Avoid suede.")
     elif rain > 0:
-        outfit.append("👟 Shoes: Water-resistant leather sneakers. No canvas.")
+        outfit.append("👟 Shoes: Water-resistant leather sneakers. No canvas..")
     elif temp > 30:
         outfit.append("👡 Shoes: Open-toe sandals or breathable mesh trainers.")
     elif feels_like < 10:
